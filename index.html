@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nuclear Reactor Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+
+    .reactor-core {
+      text-align: center;
+      padding: 20px;
+      border: 2px solid #333;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .temperature-display {
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    
+    button2 {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 18px;
+      cursor: pointer;
+      background-color: #EF233C;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    #emergency-message {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #countdown {
+      font-size: 18px;
+      margin-top: 5px;
+      font-weight: bold;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="reactor-container">
+    <div class="reactor-core">
+      <div class="temperature-display">
+        <label>Temperature: <span id="temperature">0.00</span> °C</label>
+      </div>
+      <button onclick="startReactor()">Start Reactor</button>
+      <button2 onclick="handleEmergency()">Emergency Button</button2>
+      <button onclick="stopReactor()">Stop Reactor</button>
+      <div id="emergency-message">
+        <p>Emergency: Press the emergency button</p>
+        <p id="countdown">5</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let reactorRunning = false;
+    let temperature = 0;
+    let temperatureInterval;
+    let emergencyMode = false;
+    let clicks = 0;
+    const requiredClicks = 1;
+
+    function getRandomTemperatureIncrease() {
+      return parseFloat((Math.random() * (12.5 - 0.52) + 0.47).toFixed(2));
+    }
+
+    function increaseTemperature() {
+      const increase = getRandomTemperatureIncrease();
+      temperature = parseFloat((temperature + increase).toFixed(2));
+      document.getElementById('temperature').innerText = temperature;
+
+      if (emergencyMode) {
+        checkEmergency();
+      } else {
+        const chanceOfEmergency = Math.random();
+        if (chanceOfEmergency < 0.02) { // 2% chance of an emergency per second
+          startEmergency();
+        }
+      }
+    }
+
+    function startReactor() {
+      if (!reactorRunning) {
+        temperatureInterval = setInterval(increaseTemperature, 1000);
+        reactorRunning = true;
+      }
+    }
+
+    function stopReactor() {
+      clearInterval(temperatureInterval);
+      reactorRunning = false;
+    }
+
+    function startEmergency() {
+      if (!emergencyMode) {
+        emergencyMode = true;
+        document.getElementById('emergency-message').style.display = 'block';
+        document.getElementById('countdown').innerText = '5';
+        clicks = 0;
+        const countdownInterval = setInterval(() => {
+          let countdown = parseInt(document.getElementById('countdown').innerText);
+          countdown--;
+          document.getElementById('countdown').innerText = countdown;
+          if (countdown === 0) {
+            clearInterval(countdownInterval);
+            endEmergency();
+            console.log("Reactor exploded!");
+            stopReactor();
+          }
+        }, 1000);
+      }
+    }
+
+    function handleEmergency() {
+      if (emergencyMode) {
+        clicks++;
+        checkEmergency();
+      }
+    }
+
+    function checkEmergency() {
+      if (clicks >= requiredClicks) {
+        endEmergency();
+        console.log("Disaster averted!");
+      }
+    }
+
+    function endEmergency() {
+      emergencyMode = false;
+      document.getElementById('emergency-message').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
